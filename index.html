@@ -9,44 +9,58 @@
     
     <style>
         :root {
-            --mc-bg: #1a1a1a;
-            --mc-text: #e0e0e0;
-            --mc-panel-bg: #c6c6c6;
-            --mc-panel-border-light: #ffffff;
-            --mc-panel-border-dark: #555555;
+            /* 调色板优化 */
+            --mc-bg-dark: #121010;
+            --mc-panel-face: #c6c6c6;
+            --mc-panel-shadow: #555555;
+            --mc-panel-highlight: #ffffff;
             --mc-slot-bg: #8b8b8b;
-            --mc-tooltip-bg: rgba(16, 0, 16, 0.9);
+            --mc-slot-shadow: #373737;
+            --mc-text-title: #3f3f3f;
+            --mc-text-body: #e0e0e0;
             --mc-green: #55ff55;
             --mc-gold: #ffaa00;
+            --mc-red: #ff5555;
+            --mc-blue: #5555ff;
         }
 
-        /* --- 全局设置 --- */
-        * {
-            box-sizing: border-box;
-        }
+        /* --- 全局重置与基础 --- */
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'VT323', monospace; /* 像素字体 */
-            font-size: 20px;
-            background-color: #2e211b; /* 深褐色底色 */
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); /* 立方体纹理 */
-            color: var(--mc-text);
-            /* 自定义鼠标指针 (钻石剑) - 如果图片加载失败会回退到 auto */
-            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), auto; 
-            image-rendering: pixelated; /* 图片像素化 */
+            /* 标题使用像素字，正文使用易读字体 */
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; 
+            font-size: 16px;
+            line-height: 1.6;
+            background-color: #1a1a1a;
+            /* 使用更细腻的背景纹理 */
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            color: var(--mc-text-body);
+            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), auto;
         }
 
-        /* --- 自定义滚动条 --- */
-        ::-webkit-scrollbar {
-            width: 12px;
-            background: #222;
+        /* 标题专用像素字体 */
+        h1, h2, h3, .pixel-font, .tooltip, .slot {
+            font-family: 'VT323', monospace;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
+
+        /* --- Minecraft GUI 边框混合宏 (Mixin) --- */
+        .mc-border {
+            border: 2px solid #000;
+            border-top-color: var(--mc-panel-highlight);
+            border-left-color: var(--mc-panel-highlight);
+            border-bottom-color: var(--mc-panel-shadow);
+            border-right-color: var(--mc-panel-shadow);
+        }
+        
+        .mc-border-inset {
             border: 2px solid #fff;
-            box-shadow: inset -2px -2px 0 #555;
+            border-top-color: var(--mc-panel-shadow);
+            border-left-color: var(--mc-panel-shadow);
+            border-bottom-color: var(--mc-panel-highlight);
+            border-right-color: var(--mc-panel-highlight);
         }
 
         /* --- 布局结构 --- */
@@ -54,199 +68,321 @@
             display: flex;
             max-width: 1200px;
             margin: 40px auto;
-            gap: 20px;
+            gap: 25px;
             padding: 0 20px;
+            min-height: 90vh;
         }
 
-        /* --- 左侧侧边栏 (石头风格) --- */
+        /* --- 侧边栏优化 --- */
         .sidebar {
-            width: 250px;
+            width: 260px;
             flex-shrink: 0;
-            background: #c6c6c6;
-            border: 4px solid #000;
-            border-left-color: #fff;
-            border-top-color: #fff;
-            border-right-color: #555;
-            border-bottom-color: #555;
-            padding: 10px;
+            background: var(--mc-panel-face);
+            padding: 12px;
             color: #333;
             height: fit-content;
             position: sticky;
             top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            /* 应用 MC 边框 */
+            border: 2px solid #000;
+            outline: 2px solid var(--mc-panel-face); /* 双重边框模拟 */
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
         }
 
         .sidebar h3 {
             text-align: center;
-            border-bottom: 2px solid #777;
-            padding-bottom: 10px;
-            margin-top: 0;
+            font-size: 28px;
+            margin: 5px 0 15px 0;
+            color: #404040;
+            text-shadow: 2px 2px 0px #fff;
         }
 
         .menu-btn {
             display: block;
-            width: 100%;
-            background: #8b8b8b;
+            background: #999;
             color: #fff;
-            border: 2px solid #333;
-            border-left-color: #ddd;
-            border-top-color: #ddd;
-            padding: 8px;
-            margin-bottom: 8px;
+            padding: 10px 15px;
             text-decoration: none;
-            text-align: left;
-            cursor: pointer; /* 链接也是手型/剑型 */
-            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), pointer;
+            font-size: 20px;
+            position: relative;
+            /* 按钮凸起效果 */
+            border: 2px solid #000;
+            border-top-color: #ddd;
+            border-left-color: #ddd;
+            border-bottom-color: #555;
+            border-right-color: #555;
+            transition: all 0.1s;
         }
 
         .menu-btn:hover {
-            background: #a0a0a0;
+            background: #aaa;
             color: #ffffa0;
+            text-shadow: 1px 1px 0 #333;
         }
 
-        /* --- 右侧主内容区 --- */
+        .menu-btn:active {
+            background: #888;
+            border-top-color: #555;
+            border-left-color: #555;
+            border-bottom-color: #ddd;
+            border-right-color: #ddd;
+        }
+
+        /* --- 内容区优化 --- */
         .content {
             flex-grow: 1;
-            background: rgba(0, 0, 0, 0.7);
-            border: 4px solid #fff;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(5px);
+            border: 2px solid #777;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
         }
 
-        h1, h2 {
-            color: #fff;
-            text-shadow: 3px 3px 0 #000;
+        h1 {
+            color: #ffffff;
+            font-size: 48px;
+            text-shadow: 4px 4px 0 #000;
             margin-top: 0;
-            border-bottom: 2px dashed #777;
-            padding-bottom: 10px;
+            text-align: center;
+            border-bottom: 3px solid #444;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--mc-green);
+            font-size: 36px;
+            text-shadow: 2px 2px 0 #000;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 5px solid var(--mc-panel-face);
         }
 
         p {
-            line-height: 1.6;
-            font-size: 22px;
-            color: #ddd;
+            font-size: 17px;
+            color: #ccc;
+            margin-bottom: 1.5em;
         }
 
-        /* --- 细节组件：合成表模拟器 --- */
-        .crafting-section {
+        /* 每日提示框 */
+        .tip-box {
+            background: rgba(40, 40, 40, 0.9);
+            border: 2px solid var(--mc-gold);
+            padding: 15px;
             display: flex;
             align-items: center;
-            background: #c6c6c6;
-            padding: 15px;
-            border: 4px solid #000;
-            width: fit-content;
+            gap: 15px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.1);
+        }
+        .tip-icon { font-size: 30px; }
+
+        /* --- 合成表组件深度优化 --- */
+        .crafting-container {
+            background: var(--mc-panel-face);
+            padding: 5px; /* 外框 */
+            border: 2px solid #000;
+            display: inline-block;
             margin: 20px 0;
-            color: #333;
+            border-radius: 2px;
+        }
+
+        .crafting-gui {
+            background: #c6c6c6;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            border: 2px solid #fff;
+            border-bottom-color: #555;
+            border-right-color: #555;
+            border-top-color: #fff;
+            border-left-color: #fff;
         }
 
         .crafting-grid {
             display: grid;
-            grid-template-columns: repeat(3, 40px);
-            grid-template-rows: repeat(3, 40px);
-            gap: 4px;
-            margin-right: 20px;
+            grid-template-columns: repeat(3, 36px);
+            grid-template-rows: repeat(3, 36px);
+            gap: 2px;
         }
 
+        /* 物品槽位样式 */
         .slot {
-            width: 40px;
-            height: 40px;
-            background: #8b8b8b;
-            border: 2px solid #333;
-            border-bottom-color: #fff; /* 凹陷效果 */
+            width: 36px;
+            height: 36px;
+            background: var(--mc-slot-bg);
+            /* 凹陷效果 */
+            border: 2px solid #fff;
+            border-top-color: #373737;
+            border-left-color: #373737;
+            border-bottom-color: #fff;
             border-right-color: #fff;
-            border-top-color: #333;
-            border-left-color: #333;
+            
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             cursor: help;
             position: relative;
+            transition: background 0.2s;
         }
 
-        .slot:hover .tooltip {
-            display: block;
-        }
+        .slot:hover { background: #9b9b9b; }
+        .slot:hover .tooltip { display: block; opacity: 1; top: -10px; }
 
-        .arrow {
-            font-size: 40px;
-            margin-right: 20px;
+        .crafting-arrow {
+            width: 50px;
+            height: 30px;
+            background: url('https://assets.codepen.io/13471/mc-arrow.png') no-repeat center; /* 如果图片挂了，用下面的CSS模拟 */
+            background-size: contain;
+            opacity: 0.7;
+            font-family: 'VT323';
+            font-size: 30px;
             color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        /* CSS 备用箭头 */
+        .crafting-arrow:empty::after { content: "➔"; }
 
         .output-slot {
-            width: 60px;
-            height: 60px;
-            font-size: 35px;
+            width: 56px;
+            height: 56px;
+            font-size: 32px;
         }
 
-        /* --- 细节组件：Minecraft 风格 Tooltip (紫色背景) --- */
+        /* --- Tooltip (悬浮提示) --- */
         .tooltip {
             display: none;
+            opacity: 0;
             position: absolute;
             bottom: 110%;
             left: 50%;
             transform: translateX(-50%);
-            background: #100010;
+            background: rgba(16, 0, 16, 0.95);
             border: 2px solid #2a0066;
-            color: #fff;
-            padding: 5px 10px;
-            width: max-content;
-            z-index: 10;
-            text-align: left;
-            font-family: 'VT323', monospace;
+            border-radius: 3px;
+            padding: 8px 10px;
+            min-width: 150px;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: opacity 0.1s;
         }
+        
+        .item-name { color: #fff; display: block; font-size: 18px; margin-bottom: 4px; text-shadow: 1px 1px 0 #333; }
+        .item-name.rare { color: #55ff55; }
+        .item-name.epic { color: #d455ff; }
+        .item-desc { color: #aaaaaa; font-size: 16px; display: block; line-height: 1.2; }
+        .item-id { color: #555; font-size: 14px; margin-top: 5px; display: block; }
 
-        .item-name { color: #55ff55; display: block; } /* 稀有物品颜色 */
-        .item-desc { color: #aaaaaa; font-size: 16px; display: block; }
-
-        /* --- 细节组件：生物图鉴卡 --- */
+        /* --- 生物卡片优化 --- */
         .mob-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
         }
 
         .mob-card {
-            background: #333;
-            border: 2px solid #777;
-            padding: 15px;
+            background: #222;
+            border: 2px solid #555;
+            padding: 0;
             display: flex;
-            gap: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mob-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-color: var(--mc-gold);
         }
 
         .mob-avatar {
-            width: 80px;
-            height: 80px;
-            background: #555;
+            width: 100px;
+            background: #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            border: 2px solid #000;
-        }
-
-        .mob-info h4 { margin: 0 0 5px 0; color: #ffaa00; font-size: 24px; }
-        .mob-stats { font-size: 18px; color: #ccc; }
-        .heart { color: #ff3333; }
-
-        /* --- 代码块/指令块 --- */
-        .command-block {
-            background: #222;
-            border: 1px solid #55ff55;
-            color: #55ff55;
-            padding: 15px;
-            font-family: monospace;
-            margin: 15px 0;
+            font-size: 50px;
+            border-right: 2px solid #555;
             position: relative;
         }
-        .command-block::before {
-            content: "COMMAND CONSOLE";
+        
+        /* 增加纹理背景给头像 */
+        .mob-avatar::before {
+            content: '';
             position: absolute;
-            top: -10px;
-            left: 10px;
-            background: #222;
-            padding: 0 5px;
-            font-size: 14px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.3;
+            background-size: cover;
+        }
+        .bg-creeper::before { background-image: url('https://www.transparenttextures.com/patterns/grass.png'); }
+        .bg-enderman::before { background-image: url('https://www.transparenttextures.com/patterns/purty-wood.png'); }
+
+        .mob-info {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .mob-info h4 { 
+            margin: 0 0 10px 0; 
+            color: #fff; 
+            font-size: 26px; 
+            font-family: 'VT323', monospace;
+            border-bottom: 1px dashed #555;
+        }
+        
+        .mob-stats { font-size: 15px; color: #bbb; line-height: 1.6; }
+        .tag { display: inline-block; padding: 2px 6px; border-radius: 2px; font-size: 12px; font-weight: bold; margin-bottom: 5px;}
+        .tag-hostile { background: #500; color: #ffaaaa; border: 1px solid #f55; }
+        .tag-neutral { background: #540; color: #ffeda0; border: 1px solid #fa0; }
+
+        /* --- 命令方块风格 --- */
+        .command-wrapper {
+            background: #2c251f; /* 命令方块褐 */
+            border: 2px solid #8e6c55;
+            padding: 2px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 10px #000;
+        }
+        
+        .command-header {
+            background: #8e6c55;
+            color: #fff;
+            font-family: 'VT323';
+            padding: 2px 10px;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .command-block {
+            background: #111;
+            color: var(--mc-green);
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 15px;
+            overflow-x: auto;
+            border-top: 2px solid #1a1613;
+        }
+        
+        .comment { color: #888; display: block; margin-top: 5px; font-style: italic;}
+
+        /* --- 响应式调整 --- */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; padding: 10px; }
+            .sidebar { width: 100%; position: relative; top: 0; }
+            .content { padding: 20px; }
+            .crafting-gui { flex-direction: column; padding: 15px; }
+            .crafting-arrow { transform: rotate(90deg); margin: 10px 0; }
         }
 
     </style>
@@ -256,82 +392,90 @@
     <div class="main-container">
         
         <!-- 左侧侧边栏 -->
-        <aside class="sidebar">
-            <h3>📖 百科目录</h3>
+        <aside class="sidebar pixel-font">
+            <h3>📖 冒险指南</h3>
             <a href="#" class="menu-btn">🏠 首页概览</a>
             <a href="#crafting" class="menu-btn">🛠️ 合成配方</a>
             <a href="#mobs" class="menu-btn">🧟 生物图鉴</a>
             <a href="#biomes" class="menu-btn">🌵 生物群系</a>
             <a href="#commands" class="menu-btn">💻 指令大全</a>
             
-            <div style="margin-top: 20px; text-align: center; font-size: 16px;">
-                <p>当前版本: Java 1.20.4</p>
-                <div style="width: 100%; background: #555; height: 10px; border: 1px solid #000;">
-                    <div style="width: 70%; background: #55ff55; height: 100%;"></div>
+            <div style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 18px; color: #555;">
+                <p style="margin: 5px 0;">Server Status</p>
+                <div class="mc-border-inset" style="width: 100%; background: #222; height: 16px; position: relative;">
+                    <div style="width: 85%; background: var(--mc-green); height: 100%;"></div>
                 </div>
-                <p>加载中...</p>
+                <p style="font-size: 14px; margin-top: 5px;">Online: 12,392</p>
             </div>
         </aside>
 
         <!-- 主内容区 -->
         <main class="content">
             <h1>欢迎来到方块世界</h1>
-            <p>这里是你的终极生存指南。从第一块原木到末影龙的陨落，我们记录了所有必要的知识。</p>
+            <p>这里是你的终极生存指南。从挖掘第一块原木到末影龙的陨落，我们记录了所有必要的知识。这是一个由方块构成的世界，也是你想象力的边界。</p>
             
-            <div style="background: rgba(255, 170, 0, 0.2); padding: 10px; border-left: 4px solid #ffaa00; margin-bottom: 30px;">
-                <strong>⚠️ 每日提示：</strong> 只有使用铁镐或更高级的镐子才能开采金矿石和钻石矿石！
+            <div class="tip-box">
+                <div class="tip-icon">⚠️</div>
+                <div>
+                    <strong style="color: var(--mc-gold); display: block; margin-bottom: 5px;">每日提示</strong>
+                    只有使用 <span style="color: #fff;">铁镐</span> 或更高级的镐子才能开采金矿石和钻石矿石！用木镐挖钻石会直接碎掉哦。
+                </div>
             </div>
 
             <!-- 合成表模块 -->
             <h2 id="crafting">🛠️ 基础合成 (Crafting)</h2>
-            <p>这是《我的世界》最核心的机制。以下是一个经典的合成示例：</p>
+            <p>工作台是生存的核心。以下是制作最强武器<strong>钻石剑</strong>的配方：</p>
 
-            <div class="crafting-section">
-                <!-- 3x3 模拟网格 -->
-                <div class="crafting-grid">
-                    <div class="slot"></div>
-                    <div class="slot">
-                        💎
-                        <div class="tooltip">
-                            <span class="item-name">钻石</span>
+            <div class="crafting-container">
+                <div class="mc-border">
+                    <div class="crafting-gui">
+                        <!-- 3x3 网格 -->
+                        <div class="crafting-grid">
+                            <div class="slot"></div>
+                            <div class="slot">
+                                <img src="https://minecraft.wiki/images/Diamond_JE3_BE3.png" width="24" alt="钻石">
+                                <div class="tooltip">
+                                    <span class="item-name rare">钻石</span>
+                                    <span class="item-desc">非常珍贵的矿物</span>
+                                </div>
+                            </div>
+                            <div class="slot"></div>
+                            
+                            <div class="slot"></div>
+                            <div class="slot">
+                                <img src="https://minecraft.wiki/images/Stick_JE1_BE1.png" width="24" alt="木棍">
+                                <div class="tooltip">
+                                    <span class="item-name">木棍</span>
+                                </div>
+                            </div>
+                            <div class="slot"></div>
+                            
+                            <div class="slot"></div>
+                            <div class="slot">
+                                <img src="https://minecraft.wiki/images/Stick_JE1_BE1.png" width="24" alt="木棍">
+                                <div class="tooltip">
+                                    <span class="item-name">木棍</span>
+                                </div>
+                            </div>
+                            <div class="slot"></div>
                         </div>
-                    </div>
-                    <div class="slot"></div>
-                    
-                    <div class="slot"></div>
-                    <div class="slot">
-                        🥢
-                        <div class="tooltip">
-                            <span class="item-name">木棍</span>
+                        
+                        <div class="crafting-arrow"></div>
+                        
+                        <div class="slot output-slot">
+                            <img src="https://minecraft.wiki/images/Diamond_Sword_JE3_BE3.png" width="40" alt="钻石剑">
+                            <div class="tooltip" style="width: 220px;">
+                                <span class="item-name rare">钻石剑</span>
+                                <span class="item-desc">在主手时:</span>
+                                <span class="item-desc" style="color: var(--mc-green);">+7 攻击伤害</span>
+                                <span class="item-desc" style="color: var(--mc-green);">1.6 攻击速度</span>
+                                <span class="item-id">minecraft:diamond_sword</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="slot"></div>
-                    
-                    <div class="slot"></div>
-                    <div class="slot">
-                        🥢
-                        <div class="tooltip">
-                            <span class="item-name">木棍</span>
-                        </div>
-                    </div>
-                    <div class="slot"></div>
-                </div>
-                
-                <div class="arrow">⮕</div>
-                
-                <div class="slot output-slot">
-                    ⚔️
-                    <div class="tooltip" style="width: 200px;">
-                        <span class="item-name">钻石剑</span>
-                        <span class="item-desc">攻击力: +7</span>
-                        <span class="item-desc">攻击速度: 1.6</span>
-                        <span class="item-desc" style="color: #555;">minecraft:diamond_sword</span>
                     </div>
                 </div>
             </div>
-            <p><em>试着把鼠标移动到上面的物品上，看看会发生什么？</em></p>
-
-            <hr style="border: 0; border-top: 2px dashed #555; margin: 40px 0;">
+            <p><em>试着把鼠标悬停在格子中的物品上，查看详细信息。</em></p>
 
             <!-- 生物图鉴模块 -->
             <h2 id="mobs">🧟 常见生物 (Mobs)</h2>
@@ -339,45 +483,61 @@
             <div class="mob-grid">
                 <!-- 苦力怕 -->
                 <div class="mob-card">
-                    <div class="mob-avatar" style="background: #2b5c2b; color: #000;">🤢</div>
+                    <div class="mob-avatar bg-creeper" style="background-color: #58a058;">
+                        <img src="https://minecraft.wiki/images/Creeper_Head_8-bit.png" width="60" alt="Creeper">
+                    </div>
                     <div class="mob-info">
                         <h4>苦力怕 (Creeper)</h4>
+                        <span class="tag tag-hostile">敌对生物</span>
                         <div class="mob-stats">
-                            生命: <span class="heart">❤❤❤❤❤❤❤❤❤❤</span> (20)<br>
-                            类型: <span style="color: #ff5555;">敌对</span><br>
-                            掉落: 火药, 唱片(被骷髅射杀)
+                            生命: <span style="color: #f33;">❤❤❤❤❤❤❤❤❤❤</span> (20)<br>
+                            特性: 靠近玩家后爆炸。<br>
+                            掉落: <span style="color: #ccc;">火药</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- 末影人 -->
                 <div class="mob-card">
-                    <div class="mob-avatar" style="background: #000; color: #d455ff;">👁️</div>
+                    <div class="mob-avatar bg-enderman" style="background-color: #161616;">
+                         <img src="https://minecraft.wiki/images/Enderman_Head_8-bit.png" width="60" alt="Enderman">
+                    </div>
                     <div class="mob-info">
                         <h4>末影人 (Enderman)</h4>
+                        <span class="tag tag-neutral">中立生物</span>
                         <div class="mob-stats">
-                            生命: <span class="heart">❤❤❤❤❤❤❤❤❤❤...</span> (40)<br>
-                            类型: <span style="color: #ffaa00;">中立</span><br>
-                            弱点: 水, 看着它的眼睛
+                            生命: <span style="color: #f33;">❤❤×20</span> (40点)<br>
+                            特性: 会瞬移，怕水。<br>
+                            弱点: <span style="color: var(--mc-blue);">看着它的脚</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 2px dashed #555; margin: 40px 0;">
-
             <!-- 指令模块 -->
             <h2 id="commands">💻 实用指令 (Commands)</h2>
-            <p>当你是一个服务器管理员（OP）或者在单人模式开启作弊时，你可以使用这些“魔法”：</p>
+            <p>如果你是服务器管理员（OP）或者开启了作弊模式，你可以使用控制台掌控世界。</p>
             
-            <div class="command-block">
-                /gamemode creative <br>
-                <span style="color: #888;">// 切换到创造模式，你可以飞行并拥有无限资源。</span>
+            <div class="command-wrapper">
+                <div class="command-header">
+                    <span>>_ Console</span>
+                    <span>[x]</span>
+                </div>
+                <div class="command-block">
+                    /gamemode creative <br>
+                    <span class="comment">// 切换到创造模式，你可以飞行并拥有无限资源。</span>
+                </div>
             </div>
 
-            <div class="command-block">
-                /give @p diamond_sword{Enchantments:[{id:"sharpness",lvl:5}]} 1 <br>
-                <span style="color: #888;">// 给予最近的玩家一把 锋利V 的钻石剑。</span>
+            <div class="command-wrapper">
+                <div class="command-header">
+                    <span>>_ Command Block</span>
+                    <span>[x]</span>
+                </div>
+                <div class="command-block">
+                    /give @p diamond_sword{Enchantments:[{id:"sharpness",lvl:5}]} 1 <br>
+                    <span class="comment">// 给予最近的玩家一把 锋利V 的钻石剑。</span>
+                </div>
             </div>
 
         </main>
