@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft 全方位科普指南 Wiki</title>
+    <!-- 引入像素字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --mc-bg: #1a1a1a;
+            --mc-text: #e0e0e0;
+            --mc-panel-bg: #c6c6c6;
+            --mc-panel-border-light: #ffffff;
+            --mc-panel-border-dark: #555555;
+            --mc-slot-bg: #8b8b8b;
+            --mc-tooltip-bg: rgba(16, 0, 16, 0.9);
+            --mc-green: #55ff55;
+            --mc-gold: #ffaa00;
+        }
+
+        /* --- 全局设置 --- */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'VT323', monospace; /* 像素字体 */
+            font-size: 20px;
+            background-color: #2e211b; /* 深褐色底色 */
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); /* 立方体纹理 */
+            color: var(--mc-text);
+            /* 自定义鼠标指针 (钻石剑) - 如果图片加载失败会回退到 auto */
+            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), auto; 
+            image-rendering: pixelated; /* 图片像素化 */
+        }
+
+        /* --- 自定义滚动条 --- */
+        ::-webkit-scrollbar {
+            width: 12px;
+            background: #222;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border: 2px solid #fff;
+            box-shadow: inset -2px -2px 0 #555;
+        }
+
+        /* --- 布局结构 --- */
+        .main-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        /* --- 左侧侧边栏 (石头风格) --- */
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            background: #c6c6c6;
+            border: 4px solid #000;
+            border-left-color: #fff;
+            border-top-color: #fff;
+            border-right-color: #555;
+            border-bottom-color: #555;
+            padding: 10px;
+            color: #333;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            text-align: center;
+            border-bottom: 2px solid #777;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 100%;
+            background: #8b8b8b;
+            color: #fff;
+            border: 2px solid #333;
+            border-left-color: #ddd;
+            border-top-color: #ddd;
+            padding: 8px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            text-align: left;
+            cursor: pointer; /* 链接也是手型/剑型 */
+            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), pointer;
+        }
+
+        .menu-btn:hover {
+            background: #a0a0a0;
+            color: #ffffa0;
+        }
+
+        /* --- 右侧主内容区 --- */
+        .content {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid #fff;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        h1, h2 {
+            color: #fff;
+            text-shadow: 3px 3px 0 #000;
+            margin-top: 0;
+            border-bottom: 2px dashed #777;
+            padding-bottom: 10px;
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 22px;
+            color: #ddd;
+        }
+
+        /* --- 细节组件：合成表模拟器 --- */
+        .crafting-section {
+            display: flex;
+            align-items: center;
+            background: #c6c6c6;
+            padding: 15px;
+            border: 4px solid #000;
+            width: fit-content;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .crafting-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            grid-template-rows: repeat(3, 40px);
+            gap: 4px;
+            margin-right: 20px;
+        }
+
+        .slot {
+            width: 40px;
+            height: 40px;
+            background: #8b8b8b;
+            border: 2px solid #333;
+            border-bottom-color: #fff; /* 凹陷效果 */
+            border-right-color: #fff;
+            border-top-color: #333;
+            border-left-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: help;
+            position: relative;
+        }
+
+        .slot:hover .tooltip {
+            display: block;
+        }
+
+        .arrow {
+            font-size: 40px;
+            margin-right: 20px;
+            color: #555;
+        }
+
+        .output-slot {
+            width: 60px;
+            height: 60px;
+            font-size: 35px;
+        }
+
+        /* --- 细节组件：Minecraft 风格 Tooltip (紫色背景) --- */
+        .tooltip {
+            display: none;
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #100010;
+            border: 2px solid #2a0066;
+            color: #fff;
+            padding: 5px 10px;
+            width: max-content;
+            z-index: 10;
+            text-align: left;
+            font-family: 'VT323', monospace;
+        }
+
+        .item-name { color: #55ff55; display: block; } /* 稀有物品颜色 */
+        .item-desc { color: #aaaaaa; font-size: 16px; display: block; }
+
+        /* --- 细节组件：生物图鉴卡 --- */
+        .mob-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .mob-card {
+            background: #333;
+            border: 2px solid #777;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .mob-avatar {
+            width: 80px;
+            height: 80px;
+            background: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border: 2px solid #000;
+        }
+
+        .mob-info h4 { margin: 0 0 5px 0; color: #ffaa00; font-size: 24px; }
+        .mob-stats { font-size: 18px; color: #ccc; }
+        .heart { color: #ff3333; }
+
+        /* --- 代码块/指令块 --- */
+        .command-block {
+            background: #222;
+            border: 1px solid #55ff55;
+            color: #55ff55;
+            padding: 15px;
+            font-family: monospace;
+            margin: 15px 0;
+            position: relative;
+        }
+        .command-block::before {
+            content: "COMMAND CONSOLE";
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #222;
+            padding: 0 5px;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- 左侧侧边栏 -->
+        <aside class="sidebar">
+            <h3>📖 百科目录</h3>
+            <a href="#" class="menu-btn">🏠 首页概览</a>
+            <a href="#crafting" class="menu-btn">🛠️ 合成配方</a>
+            <a href="#mobs" class="menu-btn">🧟 生物图鉴</a>
+            <a href="#biomes" class="menu-btn">🌵 生物群系</a>
+            <a href="#commands" class="menu-btn">💻 指令大全</a>
+            
+            <div style="margin-top: 20px; text-align: center; font-size: 16px;">
+                <p>当前版本: Java 1.20.4</p>
+                <div style="width: 100%; background: #555; height: 10px; border: 1px solid #000;">
+                    <div style="width: 70%; background: #55ff55; height: 100%;"></div>
+                </div>
+                <p>加载中...</p>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="content">
+            <h1>欢迎来到方块世界</h1>
+            <p>这里是你的终极生存指南。从第一块原木到末影龙的陨落，我们记录了所有必要的知识。</p>
+            
+            <div style="background: rgba(255, 170, 0, 0.2); padding: 10px; border-left: 4px solid #ffaa00; margin-bottom: 30px;">
+                <strong>⚠️ 每日提示：</strong> 只有使用铁镐或更高级的镐子才能开采金矿石和钻石矿石！
+            </div>
+
+            <!-- 合成表模块 -->
+            <h2 id="crafting">🛠️ 基础合成 (Crafting)</h2>
+            <p>这是《我的世界》最核心的机制。以下是一个经典的合成示例：</p>
+
+            <div class="crafting-section">
+                <!-- 3x3 模拟网格 -->
+                <div class="crafting-grid">
+                    <div class="slot"></div>
+                    <div class="slot">
+                        💎
+                        <div class="tooltip">
+                            <span class="item-name">钻石</span>
+                        </div>
+                    </div>
+                    <div class="slot"></div>
+                    
+                    <div class="slot"></div>
+                    <div class="slot">
+                        🥢
+                        <div class="tooltip">
+                            <span class="item-name">木棍</span>
+                        </div>
+                    </div>
+                    <div class="slot"></div>
+                    
+                    <div class="slot"></div>
+                    <div class="slot">
+                        🥢
+                        <div class="tooltip">
+                            <span class="item-name">木棍</span>
+                        </div>
+                    </div>
+                    <div class="slot"></div>
+                </div>
+                
+                <div class="arrow">⮕</div>
+                
+                <div class="slot output-slot">
+                    ⚔️
+                    <div class="tooltip" style="width: 200px;">
+                        <span class="item-name">钻石剑</span>
+                        <span class="item-desc">攻击力: +7</span>
+                        <span class="item-desc">攻击速度: 1.6</span>
+                        <span class="item-desc" style="color: #555;">minecraft:diamond_sword</span>
+                    </div>
+                </div>
+            </div>
+            <p><em>试着把鼠标移动到上面的物品上，看看会发生什么？</em></p>
+
+            <hr style="border: 0; border-top: 2px dashed #555; margin: 40px 0;">
+
+            <!-- 生物图鉴模块 -->
+            <h2 id="mobs">🧟 常见生物 (Mobs)</h2>
+            
+            <div class="mob-grid">
+                <!-- 苦力怕 -->
+                <div class="mob-card">
+                    <div class="mob-avatar" style="background: #2b5c2b; color: #000;">🤢</div>
+                    <div class="mob-info">
+                        <h4>苦力怕 (Creeper)</h4>
+                        <div class="mob-stats">
+                            生命: <span class="heart">❤❤❤❤❤❤❤❤❤❤</span> (20)<br>
+                            类型: <span style="color: #ff5555;">敌对</span><br>
+                            掉落: 火药, 唱片(被骷髅射杀)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 末影人 -->
+                <div class="mob-card">
+                    <div class="mob-avatar" style="background: #000; color: #d455ff;">👁️</div>
+                    <div class="mob-info">
+                        <h4>末影人 (Enderman)</h4>
+                        <div class="mob-stats">
+                            生命: <span class="heart">❤❤❤❤❤❤❤❤❤❤...</span> (40)<br>
+                            类型: <span style="color: #ffaa00;">中立</span><br>
+                            弱点: 水, 看着它的眼睛
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 2px dashed #555; margin: 40px 0;">
+
+            <!-- 指令模块 -->
+            <h2 id="commands">💻 实用指令 (Commands)</h2>
+            <p>当你是一个服务器管理员（OP）或者在单人模式开启作弊时，你可以使用这些“魔法”：</p>
+            
+            <div class="command-block">
+                /gamemode creative <br>
+                <span style="color: #888;">// 切换到创造模式，你可以飞行并拥有无限资源。</span>
+            </div>
+
+            <div class="command-block">
+                /give @p diamond_sword{Enchantments:[{id:"sharpness",lvl:5}]} 1 <br>
+                <span style="color: #888;">// 给予最近的玩家一把 锋利V 的钻石剑。</span>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>
